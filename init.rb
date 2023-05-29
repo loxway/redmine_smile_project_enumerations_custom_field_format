@@ -10,10 +10,10 @@ Rails.logger.info "o=>Application user : #{ENV['USER']}"
 
 
 plugin_name = :redmine_smile_project_enumerations_custom_field_format
-plugin_root = File.dirname(__FILE__)
+# plugin_root = File.dirname(__FILE__)
 
 # lib/not_reloaded
-require plugin_root + '/lib/not_reloaded/smile_tools'
+require_relative 'lib/not_reloaded/smile_tools'
 
 Redmine::Plugin.register plugin_name do
   ########################
@@ -75,7 +75,7 @@ end
 ###############
 # 5/ to_prepare
 # Executed after Rails initialization
-rails_dispatcher.to_prepare do
+# rails_dispatcher.to_prepare do
   Rails.logger.info "o=>"
   Rails.logger.info "o=>\\__ #{plugin_name} V#{plugin_version}"
 
@@ -94,56 +94,29 @@ rails_dispatcher.to_prepare do
   # but with primary loaded source code
   required = [
     # lib/
-    '/lib/project_enumeration_field_format',
-    '/lib/project_list_value_field_format',
-    "/lib/#{plugin_name}/hooks",
+    'lib/project_enumeration_field_format',
+    'lib/project_list_value_field_format',
+    "lib/#{plugin_name}/hooks",
 
     # lib/controllers
-    '/lib/controllers/smile_controllers_projects',
+    'lib/controllers/smile_controllers_projects',
 
     # lib/helpers
-    '/lib/helpers/smile_helpers_projects',
+    'lib/helpers/smile_helpers_projects',
 
     # lib/models
-    '/lib/models/smile_models_project',
-    '/lib/models/smile_models_custom_field',
+    'lib/models/smile_models_project',
+    'lib/models/smile_models_custom_field',
   ]
 
-  if Rails.env == "development"
-    ###########################
-    # 5.2/ Dynamic requirements
-    Rails.logger.debug "o=>require_dependency"
-    required.each{ |d|
-      # Reloaded each time modified
-      Rails.logger.debug "o=>  #{plugin_rel_root + d}"
-      require_dependency plugin_root + d
-    }
-    required = nil
-
-    # Folders whose contents should be reloaded, NOT including sub-folders
-
-#    ActiveSupport::Dependencies.autoload_once_paths.reject!{|x| x =~ /^#{Regexp.escape(plugin_root)}/}
-
-    autoload_plugin_paths = ['/lib/controllers', '/lib/helpers', '/lib/models']
-
-    Rails.logger.debug 'o=>'
-    Rails.logger.debug "o=>autoload_paths / watchable_dirs +="
-    autoload_plugin_paths.each{|p|
-      new_path = plugin_root + p
-      Rails.logger.debug "o=>  #{plugin_rel_root + p}"
-      ActiveSupport::Dependencies.autoload_paths << new_path
-      rails_dispatcher.watchable_dirs[new_path] = [:rb]
-    }
-  else
-    ##########################
-    # 5.3/ Static requirements
-    Rails.logger.debug "o=>require"
-    required.each{ |p|
-      # Never reloaded
-      Rails.logger.debug "o=>  #{plugin_rel_root + p}"
-      require plugin_root + p
-    }
-  end
+  ##########################
+  # 5.3/ Static requirements
+  Rails.logger.debug "o=>require"
+  required.each{ |p|
+    # Never reloaded
+    Rails.logger.debug "o=>  #{plugin_rel_root + p}"
+    require_relative p
+  }
   # END -- Manage dependencies
 
 
@@ -154,7 +127,6 @@ rails_dispatcher.to_prepare do
   # **** 6.1/ Controllers ****
   Rails.logger.info "o=>----- CONTROLLERS"
   prepend_in(ProjectsController, Smile::Controllers::ProjectsOverride::ProjectEnumerations)
-
 
   #***********************
   # **** 6.2/ Helpers ****
@@ -172,4 +144,4 @@ rails_dispatcher.to_prepare do
   SmileTools.enable_traces(false, plugin_name)
 
   Rails.logger.info 'o=>/--'
-end
+# end
