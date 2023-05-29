@@ -13,7 +13,7 @@ plugin_name = :redmine_smile_project_enumerations_custom_field_format
 # plugin_root = File.dirname(__FILE__)
 
 # lib/not_reloaded
-require_relative 'lib/not_reloaded/smile_tools'
+require_relative 'lib/smile_tools'
 
 Redmine::Plugin.register plugin_name do
   ########################
@@ -94,20 +94,36 @@ end
   # but with primary loaded source code
   required = [
     # lib/
-    'lib/project_enumeration_field_format',
-    'lib/project_list_value_field_format',
+    'lib/redmine/field_format/project_enumeration_format',
+    'lib/redmine/field_format/project_list_value_format',
     "lib/#{plugin_name}/hooks",
 
     # lib/controllers
-    'lib/controllers/smile_controllers_projects',
+    'lib/smile/controllers/projects_controller_override',
 
     # lib/helpers
-    'lib/helpers/smile_helpers_projects',
+    'lib/smile/helpers/projects_helper_override',
 
     # lib/models
-    'lib/models/smile_models_project',
-    'lib/models/smile_models_custom_field',
+    'lib/smile/models/project_override',
+    'lib/smile/models/custom_field_override',
   ]
+
+    # **** 6.1/ Controllers ****
+    Rails.logger.info "o=>----- CONTROLLERS"
+    prepend_in(ProjectsController, Smile::Controllers::ProjectsControllerOverride)
+  
+    #***********************
+    # **** 6.2/ Helpers ****
+    Rails.logger.info "o=>----- HELPERS"
+    prepend_in(ProjectsHelper, Smile::Helpers::ProjectsHelperOverride)
+  
+    #**********************
+    # **** 6.3/ Models ****
+    Rails.logger.info "o=>----- MODELS"
+    prepend_in(Project, Smile::Models::ProjectOverride)
+    prepend_in(CustomField, Smile::Models::CustomFieldOverride)
+
 
   ##########################
   # 5.3/ Static requirements
@@ -126,18 +142,18 @@ end
   #***************************
   # **** 6.1/ Controllers ****
   Rails.logger.info "o=>----- CONTROLLERS"
-  prepend_in(ProjectsController, Smile::Controllers::ProjectsOverride::ProjectEnumerations)
+  prepend_in(ProjectsController, Smile::Controllers::ProjectsControllerOverride)
 
   #***********************
   # **** 6.2/ Helpers ****
   Rails.logger.info "o=>----- HELPERS"
-  prepend_in(ProjectsHelper, Smile::Helpers::ProjectsOverride::ProjectEnumerations)
+  prepend_in(ProjectsHelper, Smile::Helpers::ProjectsHelperOverride)
 
   #**********************
   # **** 6.3/ Models ****
   Rails.logger.info "o=>----- MODELS"
-  prepend_in(Project, Smile::Models::ProjectOverride::ProjectEnumerations)
-  prepend_in(CustomField, Smile::Models::CustomFieldOverride::ProjectEnumerations)
+  prepend_in(Project, Smile::Models::ProjectOverride)
+  prepend_in(CustomField, Smile::Models::CustomFieldOverride)
 
 
   # keep traces if classes / modules are reloaded

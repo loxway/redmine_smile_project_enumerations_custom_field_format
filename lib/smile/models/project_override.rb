@@ -7,10 +7,9 @@
 
 module Smile
   module Models
-    module ProjectOverride
       #*****************
-      # 1/ ProjectEnumerations
-      module ProjectEnumerations
+      # 1/ ProjectOverride
+      module ProjectOverride
         def self.prepended(base)
           project_enumeration_methods = [
             :shared_enumerations, # 1/ new method
@@ -149,7 +148,6 @@ module Smile
             end
           end
         end
-      end # module ProjectEnumerations
-    end # module ProjectOverride
+      end # module ProjectOverride
   end # module Models
 end # module Smile
